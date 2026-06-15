@@ -48,14 +48,12 @@ export default function ListaScreen() {
 
   const navigation = useNavigation();
 
-  // Recarrega ao focar a aba (ex.: após adicionar item pela câmera).
   useFocusEffect(
     useCallback(() => {
       void reload();
     }, [reload]),
   );
 
-  // Botão de logout no header da aba.
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
