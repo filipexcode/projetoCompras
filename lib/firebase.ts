@@ -19,5 +19,31 @@ const firebaseConfig = {
     appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
 } as const;
 
+const app: FirebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
+type PersistenceFactory = (storage: unknown) => Persistence;
+
+function resolveAuth(firebaseApp: FirebaseApp): Auth {
+    const persistenceFactory = (
+        firebaseAuth as unknown as {
+            getReactNativePersistence?: PersistenceFactory;
+        }
+    ).getReactNativePersistence;
+
+    try {
+        if (typeof persistenceFactory === 'function') {
+            return initializeAuth(firebaseApp, {
+                persistence: persistenceFactory(AsyncStorage),
+            });
+        }
+        return initializeAuth(firebaseApp);
+    } catch {
+        return getAuth(firebaseApp);
+    }
+}
+
+export const auth: Auth = resolveAuth(app);
+export const db: Firestore = getFirestore(app);
+
+export default app;
 

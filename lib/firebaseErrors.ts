@@ -30,3 +30,26 @@ const FIREBASE_ERROR_MESSAGES: Record<string, string> = {
     'storage/invalid-checksum': 'Falha na integridade do arquivo. Tente novamente.',
     'storage/server-file-wrong-size': 'Falha no envio do arquivo. Tente novamente.',
 };
+
+const DEFAULT_MESSAGE = 'Ocorreu um erro inesperado. Tente novamente.';
+
+function extractErrorCode(error: unknown): string | null {
+    if (typeof error === 'object' && error !== null && 'code' in error) {
+        const code = (error as { code: unknown }).code;
+        if (typeof code === 'string') {
+            return code;
+        }
+    }
+    return null;
+}
+
+export function getFirebaseErrorMessage(error: unknown): string {
+    const code = extractErrorCode(error);
+    if (code && code in FIREBASE_ERROR_MESSAGES) {
+        return FIREBASE_ERROR_MESSAGES[code];
+    }
+    if (error instanceof Error && error.message.length > 0 && !code) {
+        return error.message;
+    }
+    return DEFAULT_MESSAGE;
+}
